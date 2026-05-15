@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Тренажёр МЦКО: А. П. Чехов</title>
+  <style>
+    :root{
+      --bg1:#071225;
+      --bg2:#0d2a45;
+      --card:#ffffff;
+      --text:#122033;
+      --muted:#64748b;
+      --blue:#1d4ed8;
+      --cyan:#06b6d4;
+      --teal:#14b8a6;
+      --green:#16a34a;
+      --red:#dc2626;
+      --orange:#f59e0b;
+      --soft:#eef7ff;
+      --line:#dbeafe;
+      --shadow:0 18px 50px rgba(0,0,0,.22);
+      --radius:24px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 12% 15%, rgba(20,184,166,.35), transparent 28%),
+        radial-gradient(circle at 85% 20%, rgba(6,182,212,.30), transparent 25%),
+        linear-gradient(135deg,var(--bg1),var(--bg2));
+      padding:22px;
+      overflow-x:hidden;
+    }
+    .wrap{max-width:1080px;margin:0 auto;}
+    .hero{
+      position:relative;
+      min-height:calc(100vh - 44px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .blob{
+      position:absolute;
+      border-radius:999px;
+      filter:blur(.2px);
+      opacity:.75;
+      pointer-events:none;
+    }
+    .b1{width:130px;height:130px;background:linear-gradient(135deg,#06b6d4,#1d4ed8);top:8%;left:2%;}
+    .b2{width:90px;height:90px;background:linear-gradient(135deg,#14b8a6,#67e8f9);bottom:12%;right:5%;}
+    .b3{width:60px;height:60px;border:8px solid rgba(255,255,255,.28);top:18%;right:16%;}
+    .start-card,.game-card,.finish-card{
+      background:rgba(255,255,255,.96);
+      border:1px solid rgba(255,255,255,.55);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      width:100%;
+    }
+    .start-card{max-width:860px;padding:38px;position:relative;}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:9px 14px;border-radius:999px;
+      background:linear-gradient(135deg,#dbeafe,#ccfbf1);
+      color:#075985;font-weight:800;font-size:14px;
+      margin-bottom:18px;
+    }
+    h1{font-size:clamp(32px,5vw,58px);line-height:1;margin:0 0 16px;font-weight:950;letter-spacing:-.04em;}
+    .lead{font-size:20px;line-height:1.55;color:#334155;margin:0 0 24px;max-width:760px;}
+    .rules{
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:24px 0;
+    }
+    .rule{
+      background:var(--soft);border:1px solid var(--line);border-radius:18px;padding:16px;
+      font-weight:700;color:#1e3a8a;
+    }
+    .rule span{display:block;color:#475569;font-weight:500;margin-top:6px;line-height:1.4;}
+    button{
+      border:none;cursor:pointer;font-family:inherit;font-weight:850;border-radius:16px;
+      transition:.18s transform,.18s box-shadow,.18s background;
+    }
+    button:hover{transform:translateY(-1px)}
+    .primary{
+      background:linear-gradient(135deg,var(--blue),var(--cyan));color:white;
+      padding:16px 24px;font-size:18px;box-shadow:0 14px 28px rgba(29,78,216,.28);
+    }
+    .secondary{
+      background:#e0f2fe;color:#075985;padding:13px 18px;font-size:16px;
+    }
+    .ghost{background:#f1f5f9;color:#334155;padding:12px 16px;font-size:15px;}
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+      padding:18px 22px;background:linear-gradient(135deg,#eff6ff,#ecfeff);border-bottom:1px solid #dbeafe;
+    }
+    .progress-wrap{flex:1;min-width:220px;}
+    .progress-info{display:flex;justify-content:space-between;font-size:14px;color:#475569;font-weight:800;margin-bottom:7px;}
+    .progress{height:12px;background:#dbeafe;border-radius:999px;overflow:hidden;}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:999px;transition:.25s width;}
+    .score-pill{padding:10px 14px;border-radius:999px;background:white;border:1px solid #bfdbfe;font-weight:900;color:#1e40af;white-space:nowrap;}
+    .content{padding:24px;display:grid;grid-template-columns:1.05fr .95fr;gap:20px;}
+    .fragment{
+      background:#f8fafc;border:1px solid #e2e8f0;border-radius:22px;padding:20px;line-height:1.62;
+      max-height:520px;overflow:auto;
+    }
+    .fragment h2{margin:0 0 12px;font-size:23px;color:#0f172a;}
+    .fragment .small{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:#0e7490;font-weight:950;margin-bottom:8px;}
+    .task-panel{background:white;border:1px solid #e2e8f0;border-radius:22px;padding:20px;}
+    .task-number{font-size:14px;color:#0e7490;font-weight:950;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
+    .task-title{font-size:22px;line-height:1.22;margin:0 0 18px;font-weight:950;color:#0f172a;}
+    .options{display:grid;gap:10px;margin-top:12px;}
+    .option{
+      text-align:left;background:#f8fafc;border:2px solid #e2e8f0;border-radius:16px;padding:14px 15px;font-size:16px;color:#1e293b;font-weight:750;
+      width:100%;
+    }
+    .option.selected{border-color:var(--blue);background:#dbeafe;color:#1e3a8a;box-shadow:0 0 0 4px rgba(29,78,216,.10);}
+    .option.correct{border-color:var(--green);background:#dcfce7;color:#14532d;}
+    .option.wrong{border-color:var(--red);background:#fee2e2;color:#7f1d1d;}
+    .matching{display:grid;gap:14px;}
+    .match-row{background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:13px;}
+    .match-row label{display:block;font-weight:850;margin-bottom:8px;line-height:1.35;}
+    select{
+      width:100%;padding:12px 13px;border:2px solid #cbd5e1;border-radius:13px;background:white;font-size:15px;color:#0f172a;font-family:inherit;
+    }
+    select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 4px rgba(29,78,216,.12)}
+    .checkbox-grid{display:grid;gap:10px;}
+    .check-option{display:flex;gap:10px;align-items:flex-start;background:#f8fafc;border:2px solid #e2e8f0;border-radius:16px;padding:13px;font-weight:750;line-height:1.35;}
+    .check-option input{width:20px;height:20px;accent-color:var(--blue);margin-top:1px;flex:0 0 auto;}
+    .check-option.checked{border-color:var(--blue);background:#dbeafe;}
+    .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px;}
+    .feedback{margin-top:14px;border-radius:16px;padding:14px 16px;font-weight:850;line-height:1.42;display:none;}
+    .feedback.good{display:block;background:#dcfce7;color:#14532d;border:1px solid #86efac;}
+    .feedback.bad{display:block;background:#fee2e2;color:#7f1d1d;border:1px solid #fecaca;}
+    .explain{font-weight:600;color:inherit;opacity:.9;margin-top:6px;}
+    .hidden{display:none!important;}
+    .finish-card{max-width:760px;margin:80px auto 0;padding:34px;text-align:center;}
+    .finish-card h2{font-size:42px;margin:0 0 10px;letter-spacing:-.03em;}
+    .big-score{font-size:72px;font-weight:1000;line-height:1;color:#1d4ed8;margin:18px 0;}
+    .results-list{margin:20px 0;text-align:left;display:grid;gap:8px;}
+    .result-item{padding:12px 14px;border-radius:14px;background:#f8fafc;border:1px solid #e2e8f0;font-weight:700;}
+    mark{background:#fef3c7;border-radius:6px;padding:0 3px;}
+    .quote{font-weight:900;color:#0f172a;}
+    @media (max-width:860px){
+      body{padding:12px;}
+      .hero{min-height:calc(100vh - 24px)}
+      .start-card{padding:26px 20px;}
+      .rules{grid-template-columns:1fr;}
+      .content{grid-template-columns:1fr;padding:16px;}
+      .fragment{max-height:300px;}
+      .task-title{font-size:20px;}
+      .topbar{padding:14px 16px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section id="startScreen" class="hero">
+      <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+      <div class="start-card">
+        <div class="badge">📘 МЦКО-тренажёр по литературе</div>
+        <h1>А. П. Чехов:<br>«Хирургия» и «Лошадиная фамилия»</h1>
+        <p class="lead">Пройди задания по двум вариантам: значение слова, средства выразительности, герои и события, верные утверждения. Всё идёт строго по порядку, как в файле.</p>
+        <div class="rules">
+          <div class="rule">8 заданий <span>Вариант 1 №3–6, затем вариант 2 №3–6.</span></div>
+          <div class="rule">Проверка сразу <span>Правильно — зелёный сигнал, ошибка — красный сигнал.</span></div>
+          <div class="rule">Фрагмент рядом <span>Текст всегда можно перечитать перед ответом.</span></div>
+          <div class="rule">Финальный результат <span>В конце увидишь количество правильных ответов.</span></div>
+        </div>
+        <button class="primary" onclick="startGame()">Начать игру</button>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="game-card hidden">
+      <div class="topbar">
+        <div class="progress-wrap">
+          <div class="progress-info"><span id="stepInfo">Задание 1 из 8</span><span id="variantInfo">Вариант 1</span></div>
+          <div class="progress"><div id="progressBar" class="bar"></div></div>
+        </div>
+        <div class="score-pill">Баллы: <span id="scoreNow">0</span></div>
+      </div>
+      <div class="content">
+        <aside class="fragment">
+          <div class="small" id="fragmentBadge">Фрагмент</div>
+          <h2 id="fragmentTitle"></h2>
+          <div id="fragmentText"></div>
+        </aside>
+        <main class="task-panel">
+          <div class="task-number" id="taskNumber"></div>
+          <h3 class="task-title" id="taskTitle"></h3>
+          <div id="taskArea"></div>
+          <div id="feedback" class="feedback"></div>
+          <div class="actions">
+            <button id="checkBtn" class="primary" onclick="checkAnswer()">Проверить ответ</button>
+            <button id="nextBtn" class="secondary hidden" onclick="nextTask()">К следующему заданию</button>
+          </div>
+        </main>
+      </div>
+    </section>
+
+    <section id="finishScreen" class="finish-card hidden">
+      <div class="badge">🏁 Тренажёр завершён</div>
+      <h2 id="finishTitle">Результат</h2>
+      <div class="big-score"><span id="finalScore">0</span>/8</div>
+      <p id="finishText" class="lead" style="margin-left:auto;margin-right:auto"></p>
+      <div id="resultsList" class="results-list"></div>
+      <button class="primary" onclick="restartGame()">Пройти ещё раз</button>
+    </section>
+  </div>
+
+  <script>
+    const fragments = {
+      surgery: {
+        variant: 'Вариант 1',
+        title: '«Хирургия»',
+        html: `
+          <p><b>Земская больница.</b> За отсутствием доктора, уехавшего жениться, больных принимает фельдшер Курятин. Это человек лет сорока, <mark>в поношенной жакетке</mark> и старых брюках. На лице у него выражение важности и довольства. Между пальцами он держит сигару, от которой идёт неприятный запах.</p>
+          <p>В приёмную входит <mark>дьячок</mark> Вонмигласов — высокий, коренастый старик в коричневой рясе и с широким кожаным поясом. На носу у него <mark>бородавка, похожая издали на большую муху</mark>. Дьячок <mark>ищет глазами икону</mark>, но, не найдя её, крестится на бутыль с карболовым раствором. Потом он достаёт из красного платочка просфору и кладёт её перед фельдшером.</p>
+          <p>Вонмигласов жалуется на зубную боль: от боли он <mark>не может ни пить, ни петь</mark> в церкви. Ему кажется, что в ухе будто гвоздик сидит, так и стреляет. Фельдшер Курятин уверенно берётся помочь больному, хотя сразу видно: он хочет казаться опытнее, чем есть на самом деле.</p>`
+      },
+      horse: {
+        variant: 'Вариант 2',
+        title: '«Лошадиная фамилия»',
+        html: `
+          <p>У отставного генерал-майора Булдеева разболелись зубы. Он полоскал рот водкой, коньяком, прикладывал к <mark>больному зубу</mark> табачную копоть, опий, скипидар, керосин, мазал щёку йодом, но всё это или не помогало, или вызывало тошноту.</p>
+          <p>Приезжал доктор. Он прописал хину, но и это не помогло. На предложение вырвать больной зуб генерал ответил отказом. Все домашние — жена, дети, прислуга, даже поварёнок Петька — предлагали каждый своё средство.</p>
+          <p><mark>Приказчик</mark> Иван Евсеич посоветовал обратиться к человеку, который умел заговаривать зубы. Только фамилию этого человека приказчик никак не мог вспомнить. Он помнил одно: <mark>фамилия будто бы была лошадиная</mark>. С этого и начались <mark>мучительные поиски нужной фамилии</mark>.</p>`
+      }
+    };
+
+    const tasks = [
+      {
+        id:'1-3', fragment:'surgery', number:'№3', type:'single',
+        title:'Опираясь на текст, выберите слово со значением «служитель при церкви, помогающий во время богослужения».',
+        options:['фельдшер','доктор','дьячок','больной'], answer:'дьячок',
+        explain:'Дьячок — церковный служитель, помогающий во время богослужения.'
+      },
+      {
+        id:'1-4', fragment:'surgery', number:'№4', type:'match',
+        title:'Установите соответствие между примерами из текста и названиями средств художественной выразительности.',
+        pairs:[
+          ['А. «в поношенной жакетке»','1'],
+          ['Б. «бородавка, похожая издали на большую муху»','3'],
+          ['В. «ищет глазами икону»','2'],
+          ['Г. «ни пить, ни петь не может»','4']
+        ],
+        choices:[['1','эпитет'],['2','метафора'],['3','сравнение'],['4','гипербола']],
+        explain:'Ответ: А—1, Б—3, В—2, Г—4.'
+      },
+      {
+        id:'1-5', fragment:'surgery', number:'№5', type:'match',
+        title:'Установите соответствие между героями рассказа «Хирургия» и событиями.',
+        pairs:[['Курятин','2'],['Вонмигласов','1'],['Доктор','3']],
+        choices:[
+          ['1','Пришёл в земскую больницу с больным зубом.'],
+          ['2','За отсутствием доктора принимает больных.'],
+          ['3','Уехал жениться.'],
+          ['4','Принёс фельдшеру просфору.'],
+          ['5','Удалил зуб быстро и без боли.']
+        ],
+        explain:'Ответ: Курятин—2, Вонмигласов—1, Доктор—3.'
+      },
+      {
+        id:'1-6', fragment:'surgery', number:'№6', type:'multi', limit:2,
+        title:'Выберите два верных утверждения, характеризующие рассказ А. П. Чехова «Хирургия».',
+        options:[
+          'Действие рассказа происходит в земской больнице.',
+          'Курятин был настоящим опытным хирургом.',
+          'Вонмигласов пришёл к фельдшеру из-за зубной боли.',
+          'Доктор принимал больных вместе с Курятиным.',
+          'Вонмигласов остался доволен лечением и поблагодарил фельдшера.'
+        ],
+        answer:[0,2],
+        explain:'Верно: действие происходит в земской больнице; Вонмигласов пришёл из-за зубной боли.'
+      },
+      {
+        id:'2-3', fragment:'horse', number:'№3', type:'single',
+        title:'Опираясь на текст, выберите слово со значением «человек, управляющий хозяйственными делами помещика или хозяина».',
+        options:['доктор','приказчик','генерал-майор','поварёнок'], answer:'приказчик',
+        explain:'Приказчик — человек, управляющий хозяйственными делами хозяина.'
+      },
+      {
+        id:'2-4', fragment:'horse', number:'№4', type:'match',
+        title:'Установите соответствие между примерами из текста и названиями средств художественной выразительности.',
+        pairs:[
+          ['А. «больной зуб»','3'],
+          ['Б. «мучительные поиски нужной фамилии»','1'],
+          ['В. «фамилия будто бы была лошадиная»','2']
+        ],
+        choices:[['1','метафора'],['2','сравнение'],['3','эпитет']],
+        explain:'Ответ: А—3, Б—1, В—2.'
+      },
+      {
+        id:'2-5', fragment:'horse', number:'№5', type:'match',
+        title:'Установите соответствие между героями рассказа «Лошадиная фамилия» и событиями.',
+        pairs:[['Булдеев','1'],['Иван Евсеич','2'],['Доктор','3']],
+        choices:[
+          ['1','Страдал от зубной боли, но сначала отказался вырывать зуб.'],
+          ['2','Посоветовал обратиться к человеку, который заговаривал зубы.'],
+          ['3','Приезжал лечить генерала и предложил удалить больной зуб.'],
+          ['4','Вспомнил фамилию знахаря сразу и отправил телеграмму.'],
+          ['5','Был поварёнком в доме Булдеева.']
+        ],
+        explain:'Ответ: Булдеев—1, Иван Евсеич—2, Доктор—3.'
+      },
+      {
+        id:'2-6', fragment:'horse', number:'№6', type:'multi', limit:2,
+        title:'Выберите два верных утверждения, характеризующие рассказ А. П. Чехова «Лошадиная фамилия».',
+        options:[
+          'У Булдеева сильно разболелись зубы.',
+          'Доктор сразу вылечил Булдеева с помощью хины.',
+          'Иван Евсеич никак не мог вспомнить фамилию человека, который заговаривал зубы.',
+          'Булдеев с самого начала согласился удалить зуб.',
+          'Фамилия знахаря оказалась Петькин.'
+        ],
+        answer:[0,2],
+        explain:'Верно: у Булдеева болели зубы; Иван Евсеич не мог вспомнить фамилию знахаря.'
+      }
+    ];
+
+    let index = 0;
+    let score = 0;
+    let answered = false;
+    let results = [];
+
+    const startScreen = document.getElementById('startScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const finishScreen = document.getElementById('finishScreen');
+    const taskArea = document.getElementById('taskArea');
+    const feedback = document.getElementById('feedback');
+    const checkBtn = document.getElementById('checkBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function startGame(){
+      startScreen.classList.add('hidden');
+      gameScreen.classList.remove('hidden');
+      renderTask();
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+    function restartGame(){
+      index = 0; score = 0; answered = false; results = [];
+      finishScreen.classList.add('hidden');
+      gameScreen.classList.remove('hidden');
+      renderTask();
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+    function renderTask(){
+      answered = false;
+      const task = tasks[index];
+      const fragment = fragments[task.fragment];
+      document.getElementById('fragmentTitle').textContent = fragment.title;
+      document.getElementById('fragmentText').innerHTML = fragment.html;
+      document.getElementById('fragmentBadge').textContent = fragment.variant + ' · Фрагмент';
+      document.getElementById('stepInfo').textContent = `Задание ${index + 1} из ${tasks.length}`;
+      document.getElementById('variantInfo').textContent = fragment.variant;
+      document.getElementById('progressBar').style.width = `${(index / tasks.length) * 100}%`;
+      document.getElementById('scoreNow').textContent = score;
+      document.getElementById('taskNumber').textContent = task.number;
+      document.getElementById('taskTitle').textContent = task.title;
+      feedback.className = 'feedback';
+      feedback.innerHTML = '';
+      checkBtn.classList.remove('hidden');
+      nextBtn.classList.add('hidden');
+      taskArea.innerHTML = '';
+
+      if(task.type === 'single') renderSingle(task);
+      if(task.type === 'match') renderMatch(task);
+      if(task.type === 'multi') renderMulti(task);
+    }
+    function renderSingle(task){
+      const box = document.createElement('div');
+      box.className = 'options';
+      task.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option';
+        btn.textContent = opt;
+        btn.onclick = () => {
+          if(answered) return;
+          document.querySelectorAll('.option').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+        };
+        box.appendChild(btn);
+      });
+      taskArea.appendChild(box);
+    }
+    function renderMatch(task){
+      const wrap = document.createElement('div');
+      wrap.className = 'matching';
+      task.pairs.forEach((pair, i) => {
+        const row = document.createElement('div');
+        row.className = 'match-row';
+        const label = document.createElement('label');
+        label.innerHTML = pair[0];
+        const select = document.createElement('select');
+        select.dataset.answer = pair[1];
+        select.innerHTML = '<option value="">— выберите ответ —</option>' + task.choices.map(c => `<option value="${c[0]}">${c[0]}. ${c[1]}</option>`).join('');
+        row.appendChild(label);
+        row.appendChild(select);
+        wrap.appendChild(row);
+      });
+      taskArea.appendChild(wrap);
+    }
+    function renderMulti(task){
+      const note = document.createElement('p');
+      note.style.cssText='margin:0 0 12px;color:#64748b;font-weight:750;';
+      note.textContent = `Нужно выбрать ровно ${task.limit} утверждения.`;
+      taskArea.appendChild(note);
+      const box = document.createElement('div');
+      box.className = 'checkbox-grid';
+      task.options.forEach((opt, i) => {
+        const label = document.createElement('label');
+        label.className = 'check-option';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.value = i;
+        input.onchange = () => {
+          const checked = [...document.querySelectorAll('input[type="checkbox"]:checked')];
+          if(checked.length > task.limit){ input.checked = false; return; }
+          label.classList.toggle('checked', input.checked);
+        };
+        const span = document.createElement('span');
+        span.textContent = opt;
+        label.appendChild(input); label.appendChild(span); box.appendChild(label);
+      });
+      taskArea.appendChild(box);
+    }
+    function checkAnswer(){
+      if(answered) return;
+      const task = tasks[index];
+      let correct = false;
+      let message = '';
+
+      if(task.type === 'single'){
+        const selected = document.querySelector('.option.selected');
+        if(!selected){ showBad('Сначала выберите один вариант ответа.'); return; }
+        correct = selected.textContent === task.answer;
+        document.querySelectorAll('.option').forEach(btn => {
+          if(btn.textContent === task.answer) btn.classList.add('correct');
+          if(btn === selected && !correct) btn.classList.add('wrong');
+        });
+      }
+      if(task.type === 'match'){
+        const selects = [...document.querySelectorAll('select')];
+        if(selects.some(s => !s.value)){ showBad('Заполните все строки соответствия.'); return; }
+        correct = selects.every(s => s.value === s.dataset.answer);
+        selects.forEach(s => {
+          s.style.borderColor = s.value === s.dataset.answer ? 'var(--green)' : 'var(--red)';
+          s.style.background = s.value === s.dataset.answer ? '#dcfce7' : '#fee2e2';
+        });
+      }
+      if(task.type === 'multi'){
+        const chosen = [...document.querySelectorAll('input[type="checkbox"]:checked')].map(i => Number(i.value)).sort((a,b)=>a-b);
+        if(chosen.length !== task.limit){ showBad(`Выберите ровно ${task.limit} утверждения.`); return; }
+        const answer = [...task.answer].sort((a,b)=>a-b);
+        correct = chosen.length === answer.length && chosen.every((v,i)=>v===answer[i]);
+        document.querySelectorAll('.check-option').forEach((label,i)=>{
+          if(task.answer.includes(i)) label.style.borderColor = 'var(--green)', label.style.background = '#dcfce7';
+          else if(label.querySelector('input').checked) label.style.borderColor = 'var(--red)', label.style.background = '#fee2e2';
+        });
+      }
+
+      answered = true;
+      if(correct){
+        score++;
+        feedback.className = 'feedback good';
+        message = `Верно! <div class="explain">${task.explain}</div>`;
+      } else {
+        feedback.className = 'feedback bad';
+        message = `Допущена ошибка. <div class="explain">${task.explain}</div>`;
+      }
+      feedback.innerHTML = message;
+      results.push({label:`${fragments[task.fragment].variant}, ${task.number} ${fragments[task.fragment].title}`, ok: correct});
+      document.getElementById('scoreNow').textContent = score;
+      checkBtn.classList.add('hidden');
+      nextBtn.classList.remove('hidden');
+      document.getElementById('progressBar').style.width = `${((index + 1) / tasks.length) * 100}%`;
+    }
+    function showBad(text){
+      feedback.className = 'feedback bad';
+      feedback.innerHTML = text;
+    }
+    function nextTask(){
+      if(index < tasks.length - 1){
+        index++;
+        renderTask();
+        window.scrollTo({top:0, behavior:'smooth'});
+      } else {
+        finish();
+      }
+    }
+    function finish(){
+      gameScreen.classList.add('hidden');
+      finishScreen.classList.remove('hidden');
+      document.getElementById('finalScore').textContent = score;
+      const text = score === tasks.length
+        ? 'Идеально! Чехов бы, наверное, прищурился и сказал: «Ну, неплохо… очень даже неплохо».'
+        : score >= 6
+          ? 'Хороший результат. Осталось чуть-чуть добить детали — особенно соответствия и средства выразительности.'
+          : 'Нужно повторить фрагменты и пройти ещё раз. Ошибки здесь не страшные: тренажёр как раз для тренировки.';
+      document.getElementById('finishText').textContent = text;
+      document.getElementById('resultsList').innerHTML = results.map(r => `<div class="result-item">${r.ok ? '✅' : '❌'} ${r.label}</div>`).join('');
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+  </script>
+</body>
+</html>
